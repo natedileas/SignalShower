@@ -26,15 +26,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.main_widget = QtWidgets.QWidget(self)
         l = QtWidgets.QHBoxLayout(self.main_widget)
 
-        interp = Interpreter(self.main_widget)
-        l.addWidget(interp)
+        self.interp = Interpreter(self.main_widget)
+        l.addWidget(self.interp)
 
-        self.tree_widget = Variables(self.main_widget, interp.session)
+        self.tree_widget = Variables(self.main_widget)
         l.addWidget(self.tree_widget)
-        interp.textChanged.connect(self.tree_widget.get_items)
+        self.interp.variables.connect(self.tree_widget.get_items)
 
-        dynamic = MyDynamicMplCanvas()
-        l.addWidget(dynamic)
+        self.dynamic = MyDynamicMplCanvas()
+        l.addWidget(self.dynamic)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
