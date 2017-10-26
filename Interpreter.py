@@ -34,15 +34,16 @@ class Interpreter(QtWidgets.QPlainTextEdit):
 
     def __init__(self, master):
         QtWidgets.QPlainTextEdit.__init__(self, master)
-        self.locals = {}
+        self.locals = {'parent':master.parent(), '__builtins__':__builtins__}
         self.globals = {}
+        self.history = []
+        self.history_idx = 0
 
         self.textChanged.connect(self.changed)
         self.out = Out(self.insertPlainText)
         self.out.write(self.ps1)
 
         self.interp = code.InteractiveInterpreter(self.locals)
-
 
     @QtCore.pyqtSlot()
     def changed(self):
@@ -65,12 +66,27 @@ class Interpreter(QtWidgets.QPlainTextEdit):
 
                 self.blockSignals(False)
                 self.variables.emit(self.locals)
+                self.history.append(cmd)
+                self.history_idx = 0
 
             except Exception as e:
                 self.out.write(e)
             finally:
                 self.out.close()
                 self.blockSignals(False)
+
+    def keyPressEvent(self, e):
+        # TODO implement history
+        if e.key() == QtCore.Qt.Key_Up:
+            self.history_idx -= 1
+            msg = self.history[self.history_idx] if self.history_idx < 0 else ''
+            self.out.write(msg)
+        elif e.key() == QtCore.Qt.Key_Down:
+            self.history_idx += 1
+            msg = self.history[self.history_idx] if self.history_idx < 0 else ''
+            self.out.write(msg)
+        else:
+            QtWidgets.QPlainTextEdit.keyPressEvent(self, e)
 
 
 class Variables(QtWidgets.QTreeWidget):
